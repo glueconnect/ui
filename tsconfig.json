@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "module": "es2015",
+        "target": "es2015",
+        "noImplicitAny": true,
+        "sourceMap": false,
+        "jsx": "react",
+        "outDir": "dest",
+        "moduleResolution": "node" 
+    },
+    "include": [
+        "src/**/*"
+    ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "glueconnect-ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack -w"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/lodash": "^4.14.62",
+    "@types/react": "^15.0.22",
+    "@types/react-dom": "^15.5.0",
+    "@types/react-hot-loader": "^3.0.1",
+    "@types/react-redux": "^4.4.39",
+    "@types/react-router-dom": "^4.0.4",
+    "@types/react-router-redux": "^5.0.0",
+    "@types/redux": "^3.6.0",
+    "lodash": "^4.17.4",
+    "materialize-css": "^0.98.2",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-hot-loader": "^3.0.0-beta.6",
+    "react-redux": "^5.0.4",
+    "react-router-dom": "^4.1.1",
+    "react-router-redux": "^5.0.0-alpha.6",
+    "redux": "^3.6.0",
+    "redux-thunk": "^2.2.0",
+    "styled-components": "^1.4.5",
+    "ts-loader": "^2.0.3",
+    "typescript": "^2.2.2",
+    "webpack": "^2.4.1",
+    "webpack-dev-server": "^2.4.2"
+  }
+}
