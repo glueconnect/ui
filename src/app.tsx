@@ -1,41 +1,40 @@
+import createHistory from 'history/createBrowserHistory';
 import * as React from 'react';
 import {Provider} from 'react-redux';
-import { createStore, combineReducers, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
 import { Route, Switch } from 'react-router';
-import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-redux'
-import createHistory from 'history/createBrowserHistory';
+import { ConnectedRouter, routerMiddleware, routerReducer } from 'react-router-redux';
+import { applyMiddleware, combineReducers, createStore } from 'redux';
+import thunk from 'redux-thunk';
 
-import {RegisterView} from './views/register'
-import {LoginView} from './views/login'
-import {MeetupListView} from './views/meetupList'
-import {MeetupDetailsView} from './views/meetupDetails'
+import {LoginView} from './views/login';
+import {MeetupDetailsView} from './views/meetupDetails';
+import {MeetupListView} from './views/meetupList';
+import {RegisterView} from './views/register';
 
-import {AppState, Meetup, User} from './models';
+import {Meetup, User} from './models';
 import {authReducer} from './reducers/auth';
 
 import {meetups} from './mockData';
 
-const history = createHistory()
+const history = createHistory();
 
-const router = routerMiddleware(history)
+const router = routerMiddleware(history);
 
 export const store = createStore(
   combineReducers({
     auth: authReducer,
     meetups : (state: Meetup[] = meetups) => state,
-    router: routerReducer
+    router: routerReducer,
   }),
-  applyMiddleware(router, thunk)
-)
-
+  applyMiddleware(router, thunk),
+);
 
 export class App extends React.PureComponent<{}, {}> {
     constructor(props: {}) {
         super(props);
     }
 
-    public render() {
+    render() {
         return (
             <Provider store={store}>
                 <ConnectedRouter history={history}>
@@ -49,11 +48,6 @@ export class App extends React.PureComponent<{}, {}> {
                     </Switch>
                 </ConnectedRouter>
             </Provider>
-        )
+        );
     }
 }
-
-/**
- * Structure:
- * 
- */
