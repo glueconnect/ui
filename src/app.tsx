@@ -11,9 +11,10 @@ import {LoginView} from './views/login'
 import {MeetupListView} from './views/meetupList'
 import {MeetupDetailsView} from './views/meetupDetails'
 
-
 import {AppState, Meetup, User} from './models';
-import reducer from './reducer';
+import {authReducer} from './reducers/auth';
+
+import {meetups} from './mockData';
 
 const history = createHistory()
 
@@ -21,7 +22,8 @@ const router = routerMiddleware(history)
 
 export const store = createStore(
   combineReducers({
-    app: reducer,
+    auth: authReducer,
+    meetups : (state: Meetup[] = meetups) => state,
     router: routerReducer
   }),
   applyMiddleware(router, thunk)

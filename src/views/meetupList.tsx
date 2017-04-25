@@ -5,13 +5,10 @@ import {RouteComponentProps, Link} from 'react-router-dom';
 
 import {AppState, Meetup} from '../models';
 
-// interface ConnectProps {
-//     meetups: AppState["meetups"];
-// }
 type ConnectProps = Pick<AppState, "meetups">
 function mapStateToProps(state: any, ownProps: void): ConnectProps {
     return {
-        meetups: state.app.meetups
+        meetups: state.meetups
     };
 }
 type Props = ConnectProps & RouteComponentProps<{}>

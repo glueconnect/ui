@@ -20,10 +20,3 @@ export interface Meetup {
     attendees: User[];
     chat: Message[];
 }
-
-//TODO: pending meetups for those created client side but not yet accepted server-side?
-export interface AppState {
-    authToken: string;
-    user: User;
-    meetups: Meetup[];
-}

@@ -2,8 +2,6 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import {RouteComponentProps} from 'react-router-dom';
 
-
-import * as auth from '../services/auth';
 import * as backend from '../backend';
 
 interface State {
@@ -20,13 +18,7 @@ export class RegisterView extends React.PureComponent<RouteComponentProps<{}>, S
             email: "",
             successMessage: "",
             errorMessage: "",
-        }
-
-        auth.get().then((token) => {
-            if (!_.isEmpty(token)) {
-                return token
-            }
-        })
+        } 
     }
 
     public render() {

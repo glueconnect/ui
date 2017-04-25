@@ -6,6 +6,11 @@ import * as models from '../models';
 
 const STORAGE_KEY = "AUTH_TOKEN"
 
+export interface AuthState {
+    token: string,
+    user: models.User
+}
+
 function validateToken(token: string): Promise<models.User> {
     return new Promise((resolve, reject) => {
         const user = _.find(users, (u) => _.startsWith(u.email, token))
@@ -19,7 +24,7 @@ function validateToken(token: string): Promise<models.User> {
 export interface Logout {
     type: "LOGOUT"
 }
-export function logout(): ThunkAction<void, models.AppState, void> {
+export function logout(): ThunkAction<void, AuthState, void> {
     return (dispatch) => {
         localStorage.removeItem(STORAGE_KEY);
         return dispatch({
@@ -33,7 +38,7 @@ export interface Login {
     token: string,
     user: models.User,
 }
-export function login(token: string): ThunkAction<Promise<{}>, models.AppState, void> {
+export function login(token: string): ThunkAction<Promise<{}>, AuthState, void> {
     return (dispatch) => {
         return validateToken(token).then((user) => {
             localStorage.setItem(STORAGE_KEY, token);
@@ -47,11 +52,6 @@ export function login(token: string): ThunkAction<Promise<{}>, models.AppState, 
 }
 
 export type AuthAction = Login | Logout
-
-export interface AuthState {
-    token: string,
-    user: models.User
-}
 
 export function authReducer(state: AuthState = {
     token : localStorage.getItem(STORAGE_KEY) || "",
