@@ -14,6 +14,8 @@ export function logout(): ThunkAction<void, models.AppState, void> {
             return dispatch({
                 type: "LOGOUT"
             });
+        }).then(() => {
+            return dispatch(push("/"));
         });
     }
 }
