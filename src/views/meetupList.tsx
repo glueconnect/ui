@@ -1,17 +1,18 @@
 import * as _ from 'lodash';
 import * as React from 'react';
 import {connect} from 'react-redux';
-import {RouteComponentProps, Link} from 'react-router-dom';
+import {Link, RouteComponentProps} from 'react-router-dom';
 
-import {AppState, Meetup} from '../models';
+import {Meetup} from '../models';
 
-type ConnectProps = Pick<AppState, "meetups">
+// needs updating
+type ConnectProps = Pick<any, 'meetups'>;
 function mapStateToProps(state: any, ownProps: void): ConnectProps {
     return {
-        meetups: state.meetups
+        meetups: state.meetups,
     };
 }
-type Props = ConnectProps & RouteComponentProps<{}>
+type Props = ConnectProps & RouteComponentProps<{}>;
 
 interface State {
     filter: string;
@@ -22,11 +23,11 @@ export class MeetupList extends React.PureComponent<Props, State> {
         super(props);
 
         this.state = {
-            filter: ""
+            filter: '',
         };
     }
 
-    public render() {
+    render() {
         return (
             <div>
                 <div>
@@ -36,12 +37,12 @@ export class MeetupList extends React.PureComponent<Props, State> {
                     {this.props.meetups.filter(this.meetupMatchesFilter).map(this.renderMeetupCard)}
                 </div>
             </div>
-        )
+        );
     }
 
     private onFilterChange = (e: any) => {
         this.setState({
-            filter : e.target.value
+            filter : e.target.value,
         });
     }
 
@@ -57,7 +58,7 @@ export class MeetupList extends React.PureComponent<Props, State> {
                 <p>{meetup.presenter == null ? '' : meetup.presenter.name}</p>
                 <p>{meetup.attendees.length} interested attendees</p>
             </div>
-        )
+        );
     }
 }
 
