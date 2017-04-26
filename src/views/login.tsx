@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {connect, Dispatch} from 'react-redux';
-import {RouteComponentProps} from 'react-router-dom';
-import {push} from 'react-router-redux';
+import { connect, Dispatch } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
+import { push } from 'react-router-redux';
 
 // import * as backend from '../backend';
 import * as auth from '../reducers/auth';
@@ -15,15 +15,17 @@ interface State {
 }
 
 interface MappedActions {
-    login(token: string): Promise<{}>;
+    login(token: string): void;
     push(route: string): any;
 }
-const mapActions = {
-    login: auth.login,
+type OwnProps = RouteComponentProps<RouteParams>;
+type Props = OwnProps & MappedActions;
+const mapStateToProps = (state: any, ownProps: OwnProps) => ({
+    login: () => ({ type: 'LOGIN', payload: { token: ownProps.match.params.hash } }),
     push,
-};
+});
 
-export class LoginViewComponent extends React.PureComponent<RouteComponentProps<RouteParams> & MappedActions, State> {
+export class LoginViewComponent extends React.PureComponent<Props, State> {
     constructor(props: any) {
         super(props);
 
@@ -40,6 +42,12 @@ export class LoginViewComponent extends React.PureComponent<RouteComponentProps<
                 errorMessage: err,
             });
         });
+    }
+
+    async componentDidMount() {
+        try {
+            this.props.login(this.props.match.params.hash);
+        }
     }
 
     render() {
