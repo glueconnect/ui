@@ -12,20 +12,20 @@ interface State {
 
 export class RegisterView extends React.PureComponent<RouteComponentProps<{}>, State> {
     constructor(props: any) {
-        super(props)
+        super(props);
 
         this.state = {
-            email: "",
-            successMessage: "",
-            errorMessage: "",
-        } 
+            email: '',
+            successMessage: '',
+            errorMessage: '',
+        };
     }
 
-    public render() {
+    render() {
         return (
             <div>
                 <h1>GLUECONnect</h1>
-                <p>Welcome to glueconnect. As part of your registration, you should have received an email with a login token. Please follow that link 
+                <p>Welcome to glueconnect. As part of your registration, you should have received an email with a login token. Please follow that link
                     to log in. If you have not received an email or would like to request a new registration token, please enter the email you
                     used for registration and a new token will be sent to you.
                 </p>
@@ -35,12 +35,12 @@ export class RegisterView extends React.PureComponent<RouteComponentProps<{}>, S
                 </form>
                 <p>{this.state.errorMessage}</p>
             </div>
-        )
+        );
     }
 
     private setPassword = (e: React.SyntheticEvent<HTMLInputElement>) => {
         this.setState({
-            errorMessage: "",
+            errorMessage: '',
             email: e.currentTarget.value,
         });
     }
@@ -49,12 +49,12 @@ export class RegisterView extends React.PureComponent<RouteComponentProps<{}>, S
         e.preventDefault();
         backend.requestLoginEmail(this.state.email).then(() => {
             this.setState({
-                successMessage: "An email has been sent.",
-            })
+                successMessage: 'An email has been sent.',
+            });
         }).catch((err) => {
             this.setState({
                 errorMessage: err,
-            })
-        });     
+            });
+        });
     }
 }

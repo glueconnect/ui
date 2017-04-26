@@ -15,26 +15,26 @@ interface State {
 }
 
 interface MappedActions {
-    login(token: string): Promise<{}>,
-    push(route: string): any,
+    login(token: string): Promise<{}>;
+    push(route: string): any;
 }
 const mapActions = {
     login: auth.login,
-    push: push
-}
+    push,
+};
 
 export class LoginViewComponent extends React.PureComponent<RouteComponentProps<RouteParams> & MappedActions, State> {
     constructor(props: any) {
-        super(props)
+        super(props);
 
         this.state = {
-            errorMessage: "",
-        }
+            errorMessage: '',
+        };
 
         const token = this.props.match.params.hash;
-        
+
         this.props.login(token).then(() => {
-            return this.props.push("/meetups");
+            return this.props.push('/meetups');
         }).catch((err: any) => {
             this.setState({
                 errorMessage: err,
@@ -42,13 +42,13 @@ export class LoginViewComponent extends React.PureComponent<RouteComponentProps<
         });
     }
 
-    public render() {
+    render() {
         return (
             <div>
                 <p>Checking...</p>
                 <p>{this.state.errorMessage}</p>
             </div>
-        )
+        );
     }
 }
 

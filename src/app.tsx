@@ -30,13 +30,12 @@ export const store = createStore(
   applyMiddleware(router, thunk),
 );
 
-
 export class App extends React.PureComponent<{}, {}> {
     constructor(props: {}) {
         super(props);
     }
 
-    public render() {
+    render() {
         return (
             <Provider store={store}>
                 <ConnectedRouter history={history}>
