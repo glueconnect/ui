@@ -1,150 +1,107 @@
 import * as _ from 'lodash';
-import {ThunkAction} from 'redux-thunk';
+import { combineEpics, Epic } from 'redux-observable';
+import {Observable} from 'rxjs';
 
+// TODO: should be injected as a dependency through redux-observable
+import * as backend from '../backend';
 import * as models from '../models';
 
-import {meetups} from '../mockdata';
+import actionCreatorFactory, {Action} from 'typescript-fsa';
 
+const actionCreator = actionCreatorFactory('MEETUPS');
+
+function isError(x: any): x is Error {
+    return x instanceof Error;
+}
+
+/**
+ * State
+ */
 export interface MeetupsState {
-    meetups: {
-        [meetupId: string]: models.Meetup,
+    list: {
+        isLoading: boolean;
+        errorMessage: string;
+        // unfiltered data:
+        allItems: models.BaseMeetup[];
+        // filtered data:
+        items: models.BaseMeetup[];
+        filter: string;
     };
-    page: number;
-    filter: string;
-}
-
-interface NewMeetup {
-    type: 'NEW_MEETUP';
-    meetup: models.Meetup;
-}
-export function createMeetup(meetup: models.Meetup): ThunkAction<Promise<NewMeetup>, MeetupsState, void> {
-    return (dispatch) => {
-        return new Promise((resolve, reject) => {
-            resolve(dispatch({
-                type: 'NEW_MEETUP',
-                meetup,
-            }));
-        }).then(() => {
-            // TODO: not sure if I want to do this?
-            return dispatch(getMeetups());
-        });
+    details: {
+        isLoading: boolean;
+        errorMessage: string;
+        meetup: models.BaseMeetup;
     };
 }
 
-interface GetMeetups {
-    type: 'GET_MEETUPS';
-    meetups: models.Meetup[];
-}
-export function getMeetups(): ThunkAction<Promise<{}>, MeetupsState, void> {
-    return (dispatch) => {
-        return new Promise((resolve, reject) => {
-            return resolve(dispatch({
-                type: 'GET_MEETUPS',
-                meetups,
-            }));
-        });
-    };
+ /**
+  * Actions
+  */
+interface MeetupDetailsPayload {
+    meetup: models.MeetupDetails;
 }
 
-interface AddPresenter {
-    type: 'ADD_PRESENTER';
-    meetupId: models.Meetup['id'];
-    presenter: models.User;
-}
-export function addPresenter(meetupId: AddPresenter['meetupId'], presenter: AddPresenter['presenter']): ThunkAction<Promise<{}>, MeetupsState, void> {
-    return (dispatch) => {
-        return new Promise((resolve, reject) => {
-            return resolve(dispatch({
-                type: 'ADD_PRESENTER',
-                meetupId,
-                presenter,
-            }));
-        });
-    };
+interface MeetupListPayload {
+    meetups: models.BaseMeetup[];
 }
 
-interface AddAttendee {
-    type: 'ADD_ATTENDEE';
-    meetupId: models.Meetup['id'];
-    attendee: models.User;
-}
-export function addAttendee(meetupId: AddAttendee['meetupId'], attendee: AddAttendee['attendee']): ThunkAction<Promise<{}>, MeetupsState, void> {
-    return (dispatch) => {
-        return new Promise((resolve, reject) => {
-            return resolve(dispatch({
-                type: 'ADD_ATTENDEE',
-                meetupId,
-                attendee,
-            }));
-        });
-    };
+interface MeetupIdPayload {
+    meetupId: models.BaseMeetup['id'];
 }
 
-interface AddChatMessage {
-    type: 'ADD_CHAT_MESSAGE';
-    meetupId: models.Meetup['id'];
+interface AddUserPayload {
+    meetupId: models.BaseMeetup['id'];
+    user: models.User;
+}
+
+interface AddChatPayload {
+    meetupId: models.BaseMeetup['id'];
     message: models.Message;
 }
-export function addChatMessage(meetupId: AddChatMessage['meetupId'], message: AddChatMessage['message']): ThunkAction<Promise<{}>, MeetupsState, void> {
-    return (dispatch) => {
-        return new Promise((resolve, reject) => {
-            return resolve(dispatch({
-                type: 'ADD_CHAT_MESSAGE',
-                meetupId,
-                message,
-            }));
+
+const CreateMeetupRequest = actionCreator<MeetupDetailsPayload>('CREATE_MEETUP_REQUEST');
+const CreateMeetupResponse = actionCreator<MeetupDetailsPayload | Error>('CREATE_MEETUP_RESPONSE');
+const createMeetupEpic: Epic<Action<any>, MeetupsState> = (action$) => {
+    return action$.ofType(CreateMeetupRequest.type)
+        .mergeMap(async (action: Action<MeetupDetailsPayload>) => {
+            try {
+                const newMeetup = await backend.createMeetup(action.payload.meetup);
+                return CreateMeetupResponse({meetup: newMeetup});
+            } catch (err) {
+                return CreateMeetupResponse(err);
+            }
         });
-    };
-}
-
-export type MEETUP_ACTIONS = NewMeetup | GetMeetups | AddPresenter | AddAttendee | AddChatMessage;
-
-const initialState: MeetupsState = {
-    page: 0,
-    filter : '',
-    meetups,
 };
 
-export function meetupReducer(state: MeetupsState = initialState, action: MEETUP_ACTIONS): MeetupsState {
-    switch (action.type) {
-        case 'NEW_MEETUP' :
-            return (() => {
-                const nextState = _.cloneDeep(state);
-                nextState.meetups[action.meetup.id] = action.meetup;
-                return nextState;
-            })();
-        case 'GET_MEETUPS' :
-            return _.merge({}, state, {
-                meetups : action.meetups,
-            });
-        case 'ADD_PRESENTER' :
-            return (() => {
-                const nextState = _.cloneDeep(state);
-                const meetup = state.meetups[action.meetupId];
-                if (meetup != null) {
-                    meetup.presenter = action.presenter;
-                }
-                return nextState;
-            })();
-        case 'ADD_ATTENDEE' :
-            return (() => {
-                const nextState = _.cloneDeep(state);
-                const meetup = state.meetups[action.meetupId];
-                if (meetup != null) {
-                    meetup.attendees.push(action.attendee);
-                }
-                return nextState;
-            })();
-        case 'ADD_CHAT_MESSAGE' :
-            return (() => {
-                const nextState = _.cloneDeep(state);
-                const meetup = state.meetups[action.meetupId];
-                if (meetup != null) {
-                    meetup.chat.push(action.message);
-                }
-                return nextState;
-            })();
-        default:
-            return state;
-    }
+const GetMeetupListRequest = actionCreator('GET_MEETUP_LIST_REQUEST');
+function GetMeetupListRequestReducer(state: MeetupsState): MeetupsState {
+    return _.merge({}, state, {
+        list: {isLoading: true},
+    });
 }
+const GetMeetupListResponse = actionCreator<MeetupListPayload | Error>('GET_MEETUP_LIST_REQUEST');
+function GetMeetupListResponseReducer(state: MeetupsState, payload: MeetupListPayload | Error): MeetupsState {
+    const nextState = _.cloneDeep(state);
+    nextState.list.isLoading = false;
+    if (isError(payload)) {
+        nextState.list.errorMessage = payload.message;
+    } else {
+        nextState.list.allItems = payload.meetups;
+    }
+    return nextState;
+}
+
+const SetFilterString = actionCreator('SET_TEXT_FILTER');
+
+const GetMeetupDetailsRequest = actionCreator<MeetupIdPayload>('GET_MEETUP_DETAILS_REQUEST');
+const GetMeetupDetailsResponse = actionCreator<MeetupDetailsPayload | Error>('GET_MEETUP_DETAILS_RESPONSE');
+
+const AddAtendeeRequest = actionCreator<AddUserPayload>('ADD_ATENDEE_REQUEST');
+const AddAtendeeResponse = actionCreator<MeetupDetailsPayload | Error>('ADD_ATENDEE_RESPONSE');
+
+const SetPresenterRequest = actionCreator<AddUserPayload>('SET_PRESENTER_REQUEST');
+const SetPresenterResponse = actionCreator<MeetupDetailsPayload | Error>('SET_PRESENTER_RESPONSE');
+
+const AddChatMessageRequest = actionCreator<AddChatPayload>('ADD_CHAT_MESSAGE_REQUEST');
+const AddChatMessageResponse = actionCreator<MeetupDetailsPayload | Error>('ADD_CHAT_MESSAGE_RESPONSE');
+

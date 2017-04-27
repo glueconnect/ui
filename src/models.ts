@@ -11,12 +11,19 @@ export interface Message {
     text: string;
 }
 
-//TODO: scheduling?
-export interface Meetup {
+// TODO: scheduling?
+export interface BaseMeetup {
     id: string;
     title: string;
     description: string;
     presenter: User;
+    attendeeCount: number;
+    chatCount: number;
+}
+
+export interface MeetupDetails extends BaseMeetup {
     attendees: User[];
     chat: Message[];
+    pendingAttendees: User[];
+    pendingChat: Message[];
 }

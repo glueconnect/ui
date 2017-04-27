@@ -9,7 +9,7 @@ import {Meetup} from '../models';
 type ConnectProps = Pick<any, 'meetups'>;
 function mapStateToProps(state: any, ownProps: void): ConnectProps {
     return {
-        meetups: state.meetups,
+        meetups: state.meetups.meetups,
     };
 }
 type Props = ConnectProps & RouteComponentProps<{}>;
@@ -34,7 +34,7 @@ export class MeetupList extends React.PureComponent<Props, State> {
                     <input type="text" placeholder="Search or create" value={this.state.filter} onChange={this.onFilterChange}/>
                 </div>
                 <div>
-                    {this.props.meetups.filter(this.meetupMatchesFilter).map(this.renderMeetupCard)}
+                    {_(this.props.meetups).filter(this.meetupMatchesFilter).map(this.renderMeetupCard).value()}
                 </div>
             </div>
         );
@@ -52,12 +52,14 @@ export class MeetupList extends React.PureComponent<Props, State> {
 
     private renderMeetupCard = (meetup: Meetup) => {
         return (
-            <div key={meetup.id} style={{borderBottom: '1px solid grey'}}>
-                <h5>{meetup.title}</h5>
-                <p>{meetup.description}</p>
-                <p>{meetup.presenter == null ? '' : meetup.presenter.name}</p>
-                <p>{meetup.attendees.length} interested attendees</p>
-            </div>
+            <Link to={`/meetups/${meetup.id}`} key={meetup.id}>
+                <div style={{borderBottom: '1px solid grey'}}>
+                    <h5>{meetup.title}</h5>
+                    <p>{meetup.description}</p>
+                    <p>{meetup.presenter == null ? '' : meetup.presenter.name}</p>
+                    <p>{meetup.attendees.length} interested attendees</p>
+                </div>
+            </Link>
         );
     }
 }

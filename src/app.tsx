@@ -4,6 +4,7 @@ import {Provider} from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { ConnectedRouter, routerMiddleware, routerReducer } from 'react-router-redux';
 import { applyMiddleware, combineReducers, createStore } from 'redux';
+import { combineEpics, createEpicMiddleware } from 'redux-observable';
 import thunk from 'redux-thunk';
 
 import {LoginView} from './views/login';
@@ -11,7 +12,7 @@ import {MeetupDetailsView} from './views/meetupDetails';
 import {MeetupListView} from './views/meetupList';
 import {RegisterView} from './views/register';
 
-import { Meetup, User} from './models';
+import { BaseMeetup, User} from './models';
 import {authReducer} from './reducers/auth';
 import {meetupReducer} from './reducers/meetups';
 

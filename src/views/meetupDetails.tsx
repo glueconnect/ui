@@ -6,6 +6,12 @@ interface RouteParams {
 }
 
 export class MeetupDetailsView extends React.PureComponent<RouteComponentProps<RouteParams>, {}> {
+    constructor(props: any) {
+        super(props);
+
+        this.props.match.params.meetupId
+    }
+
     render() {
         return (
             <div className="column is-half">
