@@ -5,7 +5,6 @@ import * as models from './models';
 
 export function requestLoginEmail(address: string): Promise<{}> {
     return new Promise((resolve, reject) => {
-        console.log(users);
         if (_.some(users, {email: address})) {
             return resolve();
         }

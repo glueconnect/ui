@@ -1,35 +1,16 @@
-import createHistory from 'history/createBrowserHistory';
 import * as React from 'react';
 import {Provider} from 'react-redux';
 import { Route, Switch } from 'react-router';
-import { ConnectedRouter, routerMiddleware, routerReducer } from 'react-router-redux';
-import { applyMiddleware, combineReducers, createStore } from 'redux';
-import { combineEpics, createEpicMiddleware } from 'redux-observable';
-import thunk from 'redux-thunk';
+import { ConnectedRouter } from 'react-router-redux';
+
+// import thunk from 'redux-thunk';
 
 import {LoginView} from './views/login';
 import {MeetupDetailsView} from './views/meetupDetails';
 import {MeetupListView} from './views/meetupList';
 import {RegisterView} from './views/register';
 
-import { BaseMeetup, User} from './models';
-import {authReducer} from './reducers/auth';
-import {meetupReducer} from './reducers/meetups';
-
-import {meetups} from './mockData';
-
-const history = createHistory();
-
-const router = routerMiddleware(history);
-
-export const store = createStore(
-  combineReducers({
-    auth: authReducer,
-    meetups : meetupReducer,
-    router: routerReducer,
-  }),
-  applyMiddleware(router, thunk),
-);
+import {history, store} from './store';
 
 export class App extends React.PureComponent<{}, {}> {
     constructor(props: {}) {

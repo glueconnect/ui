@@ -2,17 +2,29 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import {connect} from 'react-redux';
 import {Link, RouteComponentProps} from 'react-router-dom';
+import {Action} from 'typescript-fsa';
 
-import {Meetup} from '../models';
+import {BaseMeetup} from '../models';
+import {RootState} from '../store';
+import {GetMeetupListRequest} from '../store/meetups';
 
 // needs updating
-type ConnectProps = Pick<any, 'meetups'>;
-function mapStateToProps(state: any, ownProps: void): ConnectProps {
+type MappedStateProps = Pick<any, 'meetups'>;
+function mapStateToProps(state: RootState, ownProps: void): MappedStateProps {
     return {
-        meetups: state.meetups.meetups,
+        meetups: state.meetups.list.allItems,
     };
 }
-type Props = ConnectProps & RouteComponentProps<{}>;
+
+interface MappedDispatchProps {
+    GetMeetupListRequest: any;
+}
+const mapDispatchToProps = {
+    GetMeetupListRequest,
+};
+
+
+type Props = MappedStateProps & MappedDispatchProps& RouteComponentProps<{}>;
 
 interface State {
     filter: string;
@@ -25,6 +37,8 @@ export class MeetupList extends React.PureComponent<Props, State> {
         this.state = {
             filter: '',
         };
+
+        this.props.GetMeetupListRequest();
     }
 
     render() {
@@ -34,7 +48,7 @@ export class MeetupList extends React.PureComponent<Props, State> {
                     <input type="text" placeholder="Search or create" value={this.state.filter} onChange={this.onFilterChange}/>
                 </div>
                 <div>
-                    {_(this.props.meetups).filter(this.meetupMatchesFilter).map(this.renderMeetupCard).value()}
+                    {this.props.meetups.map(this.renderMeetupCard)}
                 </div>
             </div>
         );
@@ -46,22 +60,22 @@ export class MeetupList extends React.PureComponent<Props, State> {
         });
     }
 
-    private meetupMatchesFilter = (meetup: Meetup): boolean => {
+    private meetupMatchesFilter = (meetup: BaseMeetup): boolean => {
         return _.includes(meetup.title, this.state.filter) || _.includes(meetup.description, this.state.filter) ;
     }
 
-    private renderMeetupCard = (meetup: Meetup) => {
+    private renderMeetupCard = (meetup: BaseMeetup) => {
         return (
             <Link to={`/meetups/${meetup.id}`} key={meetup.id}>
                 <div style={{borderBottom: '1px solid grey'}}>
                     <h5>{meetup.title}</h5>
                     <p>{meetup.description}</p>
                     <p>{meetup.presenter == null ? '' : meetup.presenter.name}</p>
-                    <p>{meetup.attendees.length} interested attendees</p>
+                    <p>{meetup.attendeeCount} interested attendees</p>
                 </div>
             </Link>
         );
     }
 }
 
-export const MeetupListView = connect(mapStateToProps)(MeetupList);
+export const MeetupListView = connect(mapStateToProps, mapDispatchToProps)(MeetupList);
