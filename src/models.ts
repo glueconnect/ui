@@ -24,6 +24,4 @@ export interface BaseMeetup {
 export interface MeetupDetails extends BaseMeetup {
     attendees: User[];
     chat: Message[];
-    pendingAttendees: User[];
-    pendingChat: Message[];
 }

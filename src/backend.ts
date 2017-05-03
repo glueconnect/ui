@@ -28,8 +28,8 @@ function maybeError() {
     }
 }
 
-async function sleep() {
-    return new Promise((resolve) => setTimeout(resolve, 500));
+async function sleep(duration: number = 500) {
+    return new Promise((resolve) => setTimeout(resolve, duration));
 }
 
 function getMeetupById(meetupId: models.BaseMeetup['id']) {
@@ -44,12 +44,12 @@ export async function createMeetup(meetup: models.MeetupDetails): Promise<models
     maybeError();
     meetups.push(meetup);
     meetup.id = `${meetups.length}`;
-    return meetup;
+    return _.cloneDeep(meetup);
 }
 
 export async function getMeetupList(): Promise<models.BaseMeetup[]> {
     maybeError();
-    return meetups;
+    return _.cloneDeep(meetups);
 }
 
 export async function getMeetupDetails(meetupId: models.BaseMeetup['id']): Promise<models.MeetupDetails> {
@@ -59,9 +59,10 @@ export async function getMeetupDetails(meetupId: models.BaseMeetup['id']): Promi
 
 export async function addAttendee(meetupId: models.BaseMeetup['id'], attendee: models.User): Promise<models.MeetupDetails> {
     maybeError();
+    await sleep();
     const match = getMeetupById(meetupId);
     match.attendees.push(attendee);
-    return match;
+    return _.cloneDeep(match);
 }
 
 export async function setPresenter(meetupId: models.BaseMeetup['id'], presenter: models.User): Promise<models.MeetupDetails> {
@@ -71,12 +72,12 @@ export async function setPresenter(meetupId: models.BaseMeetup['id'], presenter:
         throw new Error('Somebody is already presenting on this.');
     }
     match.presenter = presenter;
-    return match;
+    return _.cloneDeep(match);
 }
 
 export async function addChatMessage(meetupId: models.BaseMeetup['id'], message: models.Message): Promise<models.MeetupDetails> {
     maybeError();
     const match = getMeetupById(meetupId);
     match.chat.push(message);
-    return match;
+    return _.cloneDeep(match);
 }

@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@types/flux-standard-action@^0.5.29":
+  version "0.5.29"
+  resolved "https://registry.yarnpkg.com/@types/flux-standard-action/-/flux-standard-action-0.5.29.tgz#a314c51d1223a377897eb3fbe83b65672a6e7117"
+
 "@types/history@*":
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.5.0.tgz#2f5c3aad4fbd00f89e99b83083e354bc5308e307"
@@ -2641,9 +2645,9 @@ type-is@~1.6.14:
     media-typer "0.3.0"
     mime-types "~2.1.15"
 
-typescript-fsa-reducers@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/typescript-fsa-reducers/-/typescript-fsa-reducers-0.3.1.tgz#f266164f8f16f16bcd870afa7933e63106fa911f"
+typescript-fsa-reducers@^0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/typescript-fsa-reducers/-/typescript-fsa-reducers-0.4.2.tgz#e7a79e88f4dc9744725d9fc4cb211a20613b16f8"
   dependencies:
     typescript-fsa "^2.0.0"
 

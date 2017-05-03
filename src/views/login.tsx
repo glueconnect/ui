@@ -4,7 +4,7 @@ import {RouteComponentProps} from 'react-router-dom';
 import {push} from 'react-router-redux';
 
 // import * as backend from '../backend';
-import * as auth from '../reducers/auth';
+import * as auth from '../store/auth';
 
 interface RouteParams {
     hash: string;

@@ -33,8 +33,6 @@ export const meetups: MeetupDetails[] = [
         chat: [],
         attendeeCount: 0,
         chatCount: 0,
-        pendingAttendees: [],
-        pendingChat: [],
     },
     {
         id: '1',
@@ -45,8 +43,6 @@ export const meetups: MeetupDetails[] = [
         chat: [],
         attendeeCount: 2,
         chatCount: 0,
-        pendingAttendees: [],
-        pendingChat: [],
     },
     {
         id: '2',
@@ -57,8 +53,6 @@ export const meetups: MeetupDetails[] = [
         chat: [],
         attendeeCount: 2,
         chatCount: 0,
-        pendingAttendees: [],
-        pendingChat: [],
     },
     {
         id: '3',
@@ -69,7 +63,5 @@ export const meetups: MeetupDetails[] = [
         chat: [],
         attendeeCount: 1,
         chatCount: 0,
-        pendingAttendees: [],
-        pendingChat: [],
     },
 ];

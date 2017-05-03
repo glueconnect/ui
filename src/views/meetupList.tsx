@@ -6,37 +6,31 @@ import {Action} from 'typescript-fsa';
 
 import {BaseMeetup} from '../models';
 import {RootState} from '../store';
-import {GetMeetupListRequest} from '../store/meetups';
+import {GetMeetupListRequest, MeetupsState, SetFilterString } from '../store/meetups';
 
 // needs updating
-type MappedStateProps = Pick<any, 'meetups'>;
+type MappedStateProps = Pick<MeetupsState['list'], 'items' | 'filter'>;
 function mapStateToProps(state: RootState, ownProps: void): MappedStateProps {
     return {
-        meetups: state.meetups.list.allItems,
+        items: state.meetups.list.items,
+        filter: state.meetups.list.filter,
     };
 }
 
 interface MappedDispatchProps {
     GetMeetupListRequest: any;
+    SetFilterString: any;
 }
 const mapDispatchToProps = {
     GetMeetupListRequest,
+    SetFilterString,
 };
-
 
 type Props = MappedStateProps & MappedDispatchProps& RouteComponentProps<{}>;
 
-interface State {
-    filter: string;
-}
-
-export class MeetupList extends React.PureComponent<Props, State> {
+export class MeetupList extends React.PureComponent<Props, {}> {
     constructor(props: any) {
         super(props);
-
-        this.state = {
-            filter: '',
-        };
 
         this.props.GetMeetupListRequest();
     }
@@ -45,23 +39,17 @@ export class MeetupList extends React.PureComponent<Props, State> {
         return (
             <div>
                 <div>
-                    <input type="text" placeholder="Search or create" value={this.state.filter} onChange={this.onFilterChange}/>
+                    <input type="text" placeholder="Search or create" value={this.props.filter} onChange={this.setFilter}/>
                 </div>
                 <div>
-                    {this.props.meetups.map(this.renderMeetupCard)}
+                    {this.props.items.map(this.renderMeetupCard)}
                 </div>
             </div>
         );
     }
 
-    private onFilterChange = (e: any) => {
-        this.setState({
-            filter : e.target.value,
-        });
-    }
-
-    private meetupMatchesFilter = (meetup: BaseMeetup): boolean => {
-        return _.includes(meetup.title, this.state.filter) || _.includes(meetup.description, this.state.filter) ;
+    private setFilter = (e: React.SyntheticEvent<HTMLInputElement>) => {
+        this.props.SetFilterString({filter: e.currentTarget.value});
     }
 
     private renderMeetupCard = (meetup: BaseMeetup) => {
