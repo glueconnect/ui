@@ -272,7 +272,7 @@ epics.push((action$) => {
         });
 });
 reducer.case(AddAttendeeRequest, (state, payload) => {
-    const nextState = {
+    return {
         ...state,
         details: {
             ...state.details,
@@ -282,8 +282,6 @@ reducer.case(AddAttendeeRequest, (state, payload) => {
             },
         },
     };
-
-    return nextState;
 });
 reducer.case(AddAttendeeSuccess, (state, payload) => {
     const pendingAttendees = _.clone(state.details.pendingAttendees);

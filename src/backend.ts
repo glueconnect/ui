@@ -23,7 +23,7 @@ export function checkHash(hash: string): Promise<models.User> {
 }
 
 function maybeError() {
-    if  (_.random(0, 100, false) > 95) {
+    if  (_.random(0, 100, false) > 100) {
         throw new Error('Something went wrong.');
     }
 }
