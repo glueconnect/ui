@@ -1,5 +1,10 @@
 import * as _ from 'lodash';
 
+export interface Error {
+    message: string;
+    details: string;
+}
+
 export interface User {
     id: string;
     name: string;

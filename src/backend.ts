@@ -23,7 +23,7 @@ export function checkHash(hash: string): Promise<models.User> {
 }
 
 function maybeError() {
-    if  (_.random(0, 100, false) > 100) {
+    if  (_.random(0, 100, false) > 50) {
         throw new Error('Something went wrong.');
     }
 }
@@ -77,6 +77,7 @@ export async function setPresenter(meetupId: models.BaseMeetup['id'], presenter:
 
 export async function addChatMessage(meetupId: models.BaseMeetup['id'], message: models.Message): Promise<models.MeetupDetails> {
     maybeError();
+    await sleep();
     const match = getMeetupById(meetupId);
     match.chat.push(message);
     return _.cloneDeep(match);

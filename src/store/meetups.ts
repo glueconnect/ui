@@ -33,11 +33,13 @@ export interface MeetupsState {
         errorMessage: string;
         meetup: models.MeetupDetails;
         pendingChat: {
-            [pendingId: string]: models.Message,
+            [pendingId: string]: {
+                isFailed: boolean,
+                message: models.Message,
+            },
         };
-        pendingAttendees: {
-            [pendingId: string]: models.User,
-        };
+        pendingAttendee: boolean;
+        pendingPresenter: boolean;
     };
     new: {
         isLoading: boolean;
@@ -58,7 +60,8 @@ const initialState: MeetupsState = {
         isLoading: true,
         errorMessage: '',
         meetup: null,
-        pendingAttendees: {},
+        pendingAttendee: false,
+        pendingPresenter: false,
         pendingChat: {},
     },
     new: {
@@ -216,7 +219,8 @@ reducer.case(GetMeetupDetailsResponse, (state, payload) => {
             state.details.meetup.id !== payload.meetup.id;
 
         if (newMeetup) {
-            stateChanges.pendingAttendees = {};
+            stateChanges.pendingAttendee = false;
+            stateChanges.pendingPresenter = false;
             stateChanges.pendingChat = {};
         }
     }
@@ -239,102 +243,179 @@ epics.push((action$) => {
         });
 });
 
-type AddPendingUserPayload = AddUserPayload & PendingIdPayload;
-type AddPendingUserSuccess = MeetupDetailsPayload & PendingIdPayload;
-type AddPendingUserFailure = Error & PendingIdPayload;
 export const AddAttendee = actionCreator<AddUserPayload>('ADD_ATENDEE');
-const AddAttendeeRequest = actionCreator<AddPendingUserPayload>('ADD_ATENDEE_REQUEST');
-const AddAttendeeSuccess = actionCreator<AddPendingUserSuccess>('ADD_ATENDEE_SUCCESS');
-const AddAttendeeFailure = actionCreator<AddPendingUserFailure>('ADD_ATENDEE_FAILURE');
+const AddAttendeeSuccess = actionCreator<MeetupDetailsPayload>('ADD_ATENDEE_SUCCESS');
+const AddAttendeeFailure = actionCreator<Error>('ADD_ATENDEE_FAILURE');
 
-let id = 0;
-epics.push((action$) => {
-    return action$.ofType(AddAttendee.type)
-        .mergeMap((action: Action<AddUserPayload>) => {
-            const {payload} = action;
-            const pendingId = `${id++}`;
-
-            const request = Observable.of(AddAttendeeRequest({
-                ...payload,
-                pendingId,
-            }));
-
-            const response = (async () => {
-                try {
-                    const meetup = await backend.addAttendee(payload.meetupId, payload.user);
-                    return AddAttendeeSuccess({meetup, pendingId});
-                } catch (err) {
-                    return AddAttendeeFailure(_.extend(err, {pendingId}));
-                }
-            })();
-
-            return Observable.merge(request, response);
-        });
-});
-reducer.case(AddAttendeeRequest, (state, payload) => {
+// let id = 0;
+reducer.case(AddAttendee, (state, payload) => {
     return {
         ...state,
         details: {
             ...state.details,
-            pendingAttendees: {
-                ...state.details.pendingAttendees,
-                [payload.pendingId]: payload.user,
-            },
+            pendingAttendee: true,
         },
     };
 });
 reducer.case(AddAttendeeSuccess, (state, payload) => {
-    const pendingAttendees = _.clone(state.details.pendingAttendees);
-    delete pendingAttendees[payload.pendingId];
-
     return {
         ...state,
         details: {
             ...state.details,
             meetup: payload.meetup,
-            pendingAttendees,
+            pendingAttendee: false,
         },
     };
 });
 reducer.case(AddAttendeeFailure, (state, payload) => {
-    const pendingAttendees = _.clone(state.details.pendingAttendees);
-    delete pendingAttendees[payload.pendingId];
-
     return {
         ...state,
         details: {
             ...state.details,
             errorMessage: payload.message,
-            pendingAttendees,
+            pendingAttendee: false,
         },
     };
 });
+epics.push((action$) => {
+    return action$.ofType(AddAttendee.type)
+        .mergeMap((action: Action<AddUserPayload>) => {
+            const {meetupId, user} = action.payload;
 
+            return (async () => {
+                try {
+                    const meetup = await backend.addAttendee(meetupId, user);
+                    return AddAttendeeSuccess({meetup});
+                } catch (err) {
+                    return AddAttendeeFailure(err);
+                }
+            })();
+        });
+});
 
-export const SetPresenterRequest = actionCreator<AddUserPayload>('SET_PRESENTER_REQUEST');
-const SetPresenterResponse = actionCreator<MeetupDetailsPayload | Error>('SET_PRESENTER_RESPONSE');
-reducer.case(SetPresenterRequest, (state, payload) => {
+export const AddPresenter = actionCreator<AddUserPayload>('ADD_PRESENTER');
+const AddPresenterSuccess = actionCreator<MeetupDetailsPayload>('ADD_PRESENTER_SUCCESS');
+const AddPresenterFailure = actionCreator<Error>('ADD_PRESENTER_FAILURE');
+reducer.case(AddPresenter, (state, payload) => {
     return {
         ...state,
+        details: {
+            ...state.details,
+            pendingPresenter: true,
+        },
     };
 });
-reducer.case(SetPresenterResponse, (state, payload) => {
+reducer.case(AddPresenterSuccess, (state, payload) => {
     return {
         ...state,
+        details: {
+            ...state.details,
+            meetup: payload.meetup,
+            pendingPresenter: false,
+        },
     };
+});
+reducer.case(AddPresenterFailure, (state, payload) => {
+    return {
+        ...state,
+        details: {
+            ...state.details,
+            errorMessage: payload.message,
+            pendingPresenter: false,
+        },
+    };
+});
+epics.push(($action) => {
+    return $action.ofType(AddPresenter.type)
+        .mergeMap(async (action: Action<AddUserPayload>) => {
+            const {meetupId, user} = action.payload;
+
+            try {
+                const meetup = await backend.setPresenter(meetupId, user);
+                return AddPresenterSuccess({meetup});
+            } catch (err) {
+                return AddPresenterFailure(err);
+            }
+        });
 });
 
-export const AddChatMessageRequest = actionCreator<AddChatPayload>('ADD_CHAT_MESSAGE_REQUEST');
-const AddChatMessageResponse = actionCreator<MeetupDetailsPayload | Error>('ADD_CHAT_MESSAGE_RESPONSE');
-reducer.case(AddChatMessageRequest, (state, payload) => {
+
+// type AddPendingChatRequest = AddChatPayload & PendingIdPayload;
+// type AddPendingChatSuccess = AddChatPayload & PendingIdPayload;
+// type AddPendingChatFailure = AddChatPayload & PendingIdPayload;
+// export const AddChatMessage = actionCreator<AddChatPayload>('ADD_CHAT_MESSAGE');
+// export const AddChatMessageRequest = actionCreator<AddChatPayload>('ADD_CHAT_MESSAGE_REQUEST');
+// const AddChatMessageSuccess = actionCreator<AddPendingChatMessage>('ADD_CHAT_MESSAGE_SUCCESS');
+// const AddChatMessageFailure = actionCreator<MeetupDetailsPayload | Error>('ADD_CHAT_MESSAGE_FAILURE');
+
+type AddPendingChatPayload = AddChatPayload & PendingIdPayload;
+type AddPendingChatSuccessPayload = MeetupDetailsPayload & PendingIdPayload;
+type AddPendingChaFailurePayload = Error & PendingIdPayload;
+export const AddChat = actionCreator<AddChatPayload>('ADD_CHAT');
+export const AddPendingChat = actionCreator<AddPendingChatPayload>('ADD_PENDING_CHAT');
+const AddPendingChatSuccess = actionCreator<AddPendingChatSuccessPayload>('ADD_PENDING_CHAT_SUCCESS');
+const AddPendingChatFailure = actionCreator<AddPendingChaFailurePayload>('ADD_PENDING_CHAT_FAILURE');
+reducer.case(AddPendingChat, (state, payload) => {
     return {
         ...state,
+        details : {
+            ...state.details,
+            pendingChat : {
+                ...state.details.pendingChat,
+                [payload.pendingId] : {
+                    isFailed: false,
+                    message: payload.message,
+                },
+            },
+        },
     };
 });
-reducer.case(AddChatMessageResponse, (state, payload) => {
+reducer.case(AddPendingChatSuccess, (state, payload) => {
+    const pendingChat = _.clone(state.details.pendingChat);
+    delete pendingChat[payload.pendingId];
+
     return {
         ...state,
+        details : {
+            ...state.details,
+            meetup: payload.meetup,
+            pendingChat,
+        },
     };
+});
+reducer.case(AddPendingChatFailure, (state, payload) => {
+    return {
+        ...state,
+        details : {
+            ...state.details,
+            pendingChat : {
+                ...state.details.pendingChat,
+                [payload.pendingId] : {
+                    ...state.details.pendingChat[payload.pendingId],
+                    isFailed: true,
+                },
+            },
+        },
+    };
+});
+let id = 0;
+epics.push(($action) => {
+    return $action.ofType(AddChat.type)
+        .mergeMap((action: Action<AddChatPayload>) => {
+            const pendingId = `${id++}`;
+            const {meetupId, message} = action.payload;
+
+            const request = Observable.of(AddPendingChat({meetupId, message, pendingId}));
+
+            const response = backend.addChatMessage(meetupId, message)
+                .then((meetup) => {
+                    return AddPendingChatSuccess({meetup, pendingId});
+                }).catch((err) => {
+                    return AddPendingChatFailure(_.extend(err, {pendingId}));
+                });
+
+            return Observable.merge(request, response);
+        });
 });
 
 export const meetupReducer = reducer.build();
